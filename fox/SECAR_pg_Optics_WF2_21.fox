@@ -1,21 +1,17 @@
-{INCLUDE '/mnt/simulations/secarml/secar_mobo/COSY10.0/COSY';}
-INCLUDE '/Applications/COSY/COSY';
+INCLUDE '/mnt/simulations/secarml/secar_mobo/COSY10.0/COSY';
+{INCLUDE '/Applications/COSY/COSY';}
 
 PROCEDURE RUN ;
 
-{VARIABLE<name><length>}
-{VARIABLE<name><expression><expression>}
-
-{Dipole magnets}
-VARIABLE B1N 1 7; {Dipole 1 B-field index}
-VARIABLE B1S1 1 7; VARIABLE B1S2 1 7; {Dipole 1 entrance-edge and exit-edge curvatures}
-VARIABLE B2S1 1 7; VARIABLE B2S2 1 7; {Dipole 2 entrance-edge and exit-edge curvatures}
-VARIABLE B3S1 1 7; VARIABLE B3S2 1 7; {Dipole 3 entrance-edge and exit-edge curvatures}
-VARIABLE B4S1 1 7; VARIABLE B4S2 1 7; {Dipole 4 entrance-edge and exit-edge curvatures}
-VARIABLE B5S1 1 7; VARIABLE B5S2 1 7; {Dipole 5 entrance-edge and exit-edge curvatures}
-VARIABLE B6S1 1 7; VARIABLE B6S2 1 7; {Dipole 6 entrance-edge and exit-edge curvatures}
-VARIABLE B7S1 1 7; VARIABLE B7S2 1 7; {Dipole 7 entrance-edge and exit-edge curvatures}
-VARIABLE B8S1 1 7; VARIABLE B8S2 1 7; {Dipole 8 entrance-edge and exit-edge curvatures}
+VARIABLE B1N 1 7;
+VARIABLE B1S1 1 7; VARIABLE B1S2 1 7;
+VARIABLE B2S1 1 7; VARIABLE B2S2 1 7;
+VARIABLE B3S1 1 7; VARIABLE B3S2 1 7;
+VARIABLE B4S1 1 7; VARIABLE B4S2 1 7;
+VARIABLE B5S1 1 7; VARIABLE B5S2 1 7;
+VARIABLE B6S1 1 7; VARIABLE B6S2 1 7;
+VARIABLE B7S1 1 7; VARIABLE B7S2 1 7;
+VARIABLE B8S1 1 7; VARIABLE B8S2 1 7;
 
 {Wien filter higher order components}
 VARIABLE NE1 1 4;
@@ -23,21 +19,21 @@ VARIABLE NM1 1 4;
 
 VARIABLE NE2 1 4; {to accommodate E-field, WF2 feed through modif. by DF}
 
-VARIABLE WV 1; {HO half-width signal distri at FP}
+VARIABLE WV 1;
 VARIABLE WW 1 2;
-VARIABLE CENTER 1; {Center of HO signal distri at FP}
-VARIABLE NMAX 1; {Maximum number of iterations}
-VARIABLE WVX 1; {1/2 horizontal image size}
-VARIABLE WVY 1; {1/2 verticla image size}
+VARIABLE CENTER 1;
+VARIABLE NMAX 1;
+VARIABLE WVX 1;
+VARIABLE WVY 1;
 
-VARIABLE XX 1; {Source size in X}
-VARIABLE AX 1; {Half-emission angle in X-Z (bending) plane}
-VARIABLE YY 1; {Source size in Y}
-VARIABLE AY 1; {Half-emission angle in Y-Z (non-bending) plane}
-VARIABLE DE 1; {Spectrometer energy spread}
+VARIABLE XX 1;{x_SIZE}
+VARIABLE AX 1;
+VARIABLE YY 1;{Y-SIZE}
+VARIABLE AY 1;
+VARIABLE DE 1;
 
 {Ray definitions}
-VARIABLE SRXX 1;  
+VARIABLE SRXX 1; 
 VARIABLE SRAX 1;
 VARIABLE SRYY 1;
 VARIABLE SRAY 1;
@@ -71,7 +67,6 @@ VARIABLE OCT1ON 1;
 VARIABLE WF1ON 1;
 VARIABLE WF2ON 1;
 
-{Q = Quadrupoles, H = Hexapoles}
 VARIABLE Q1  1;
 VARIABLE Q1H 1;
 VARIABLE Q2  1;
@@ -842,7 +837,7 @@ O1_SC:= 1.0;
 
 {THIS IS WHERE YOU CHANGE YOU CONFIGURATION}
 WF1R:=7.; {define the bending radius in WF1}
-WF2R:=7.; {define the bending radius in WF2 -- not important here because it is off}
+WF2R:=21.; {define the bending radius in WF2 -- not important here because it is off}
 WF1ON:=1; {WF2ON 0=OFF or 1=ON - CURRENTLY WF2 IS OFF}
 WF2ON:=1; {WF2ON 0=OFF or 1=ON - CURRENTLY WF2 IS OFF}
 MISALIGN:=1; {ACCOUNT =1 or not =0 for the measured misalignment}

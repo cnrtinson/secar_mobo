@@ -20,6 +20,10 @@ from cosy import cosyrun, write_fox
 from problem import optimizeRes
 from secar_utils import run_kmeans, is_pareto_efficient_simple, load_configs
 
+PYGMO_DIR = "../"
+OUTPUT_DIR = PYGMO_DIR + "output/"
+FOX_DIR = PYGMO_DIR + 'fox/'
+
 configs = load_configs()
 kclusters = configs['clusters']
 
@@ -40,10 +44,18 @@ fox_name = configs['fox_name']
 
 fNom = np.array([2384.9360856494263, 109.61548781662407, 510.8029152516118, 1.6251646888022029, 0.12574090408565933])
 
+def pca_comps_to_factors(comp_x):
+    comps = np.loadtxt(FOX_DIR+'components.csv',delimiter=',')
+    mu = comps[0,:]
+    comps = comps[1:,:]
+    pass_x = np.dot(comp_x, comps)    
+    pass_x += mu
+    print(comp_x, mu, comps, pass_x)
+    return pass_x
+
 # read pop from h5 file (i.e. after running view_db.py)
 def read_pop_df(filename, pop=None):
     df = pd.read_hdf(filename)
-    magnet_dim = 19
     p_optimizeRes = pg.problem(optimizeRes(magnet_dim))
     nobj = p_optimizeRes.get_nobj()
     if pop == None:
@@ -76,12 +88,8 @@ def read_pop_df(filename, pop=None):
     return pop, df
 
 # write cosy draw files from the best points
-def output_4d_cosy(popi,filename,df):
+def output_4d_cosy(popi,filename,df, pca_bool):
 
-    hv = pg.hypervolume(popi)
-    ref_point = hv.refpoint()
-    ref_point = np.zeros(optimized_params)+1e10 
-    best_point = (popi.get_f()[hv.greatest_contributor(ref_point)])
     ndf, dl, dc, ndl = pg.fast_non_dominated_sorting(popi.get_f())
     magnet_dim = len(popi.get_x()[0])
     ndf_champ = []
@@ -138,12 +146,20 @@ def output_4d_cosy(popi,filename,df):
         shutil.rmtree(PROFILES_PATH)
     os.mkdir(PROFILES_PATH)
     qNew = np.zeros(19)+1
-    write_fox((qNew), 0, PROFILES_PATH, '{}_draw.fox'.format(fox_name) )
-    write_fox((qNew), str(0)+"_DE", PROFILES_PATH, '{}_DE_draw.fox'.format(fox_name) )
+    plot_i = 0
+    write_fox((qNew), 0, FOX_DIR, '{}_draw.fox'.format(fox_name) )
+    src = FOX_DIR + "pygmoCosy"+str(plot_i)+".fox"
+    dest = PROFILES_PATH + "pygmoCosy"+str(plot_i)+".fox"
+    shutil.move(src, dest)
+    write_fox((qNew), str(0)+"_DE", FOX_DIR, '{}_DE_draw.fox'.format(fox_name) )
+    src = FOX_DIR + "pygmoCosy"+str(plot_i)+"_DE.fox"
+    dest = PROFILES_PATH + "pygmoCosy"+str(plot_i)+"_DE.fox"
+    shutil.move(src, dest)
     count_dups = 0
-    plot_i = 1
-    for i in df_closest.index:
-        i = i + 1
+    plot_i += 1
+    df_closest = df_closest.sort_values(by='MaxBeamWidth', ascending=True)
+    for i in range(df_closest.shape[0]):
+#        i = i + 1
         j = sorted_ndf[i-1] 
 #        print(popi.get_f()[j])
 #        if i > 1:
@@ -151,12 +167,46 @@ def output_4d_cosy(popi,filename,df):
 #                if np.array_equal(sorted_pop[i-1],sorted_pop[k]):
 #                    count_dups += 1
 #                    break
-        write_fox(popi.get_x()[j], plot_i, PROFILES_PATH, '{}_draw.fox'.format(fox_name))
-        write_fox(popi.get_x()[j], str(plot_i)+"_DE", PROFILES_PATH, '{}_DE_draw.fox'.format(fox_name))
+#        write_fox(popi.get_x()[j], plot_i, FOX_DIR, '{}_draw.fox'.format(fox_name))
+        print(df_closest, i, df_closest.shape)
+        print(df_closest.index)
+        qNew = None
+        qNew_temp = df_closest.iloc[i,0:magnet_dim]
+        if pca_bool:
+            qNew = pca_comps_to_factors(qNew_temp)
+        else:
+            qNew = qNew_temp
+        write_fox(qNew, plot_i, FOX_DIR, '{}_draw.fox'.format(fox_name))
+        src = FOX_DIR + "pygmoCosy"+str(plot_i)+".fox"
+        dest = PROFILES_PATH + "pygmoCosy"+str(plot_i)+".fox"
+        shutil.move(src, dest)
+#        write_fox(popi.get_x()[j], str(plot_i)+"_DE", FOX_DIR, '{}_DE_draw.fox'.format(fox_name))
+        write_fox(qNew, str(plot_i)+"_DE", FOX_DIR, '{}_DE_draw.fox'.format(fox_name))
+        src = FOX_DIR + "pygmoCosy"+str(plot_i)+"_DE.fox"
+        dest = PROFILES_PATH + "pygmoCosy"+str(plot_i)+"_DE.fox"
+        shutil.move(src, dest)
+        plot_i += 1
+    for i in df.loc[df['ssobjs']==df['ssobjs'].min()].index:
+        qNew = None
+        qNew_temp = df.iloc[i,0:magnet_dim]
+        if pca_bool:
+            qNew = pca_comps_to_factors(qNew_temp)
+        else:
+            qNew = qNew_temp
+        write_fox(qNew, plot_i, FOX_DIR, '{}_draw.fox'.format(fox_name))
+
+        src = FOX_DIR + "pygmoCosy"+str(plot_i)+".fox"
+        dest = PROFILES_PATH + "pygmoCosy"+str(plot_i)+".fox"
+        shutil.move(src, dest)
+#        write_fox(popi.get_x()[j], str(plot_i)+"_DE", FOX_DIR, '{}_DE_draw.fox'.format(fox_name))
+        write_fox(qNew, str(plot_i)+"_DE", FOX_DIR, '{}_DE_draw.fox'.format(fox_name))
+        src = FOX_DIR + "pygmoCosy"+str(plot_i)+"_DE.fox"
+        dest = PROFILES_PATH + "pygmoCosy"+str(plot_i)+"_DE.fox"
+        shutil.move(src, dest)
         plot_i += 1
     return
 
-def main(filename):
+def main(filename, pca_bool ):
 
     print("\nWriting cosy fox files for the {} identified cluster centroids\n".format(kclusters))
     file_extension = os.path.splitext(filename)[-1]
@@ -166,7 +216,7 @@ def main(filename):
     df = None
     if file_extension == ".h5":
         popi, df = read_pop_df(filename)
-        output_4d_cosy(popi, filename, df)
+        output_4d_cosy(popi, filename, df, pca_bool)
 
 if __name__=='__main__':
     script, filename = sys.argv

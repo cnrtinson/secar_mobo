@@ -2,7 +2,7 @@
 
 # import commands
 from cosy import cosyrun
-from numpy import array, zeros, multiply, power
+from numpy import array, zeros, multiply, power, loadtxt, dot
 import secar_utils as secar_utils 
 
 configs = secar_utils.load_configs()
@@ -15,6 +15,14 @@ PYGMO_DIR = '../'
 FOX_DIR = PYGMO_DIR + 'fox/'
 OUTPUT_DIR = PYGMO_DIR + 'output/'
 SCRATCH_DIR = configs['scratch_dir']
+
+def pca_comps_to_factors(comp_x):
+    comps = loadtxt(FOX_DIR+'components.csv',delimiter=',')
+    mu = comps[0,:]
+    comps = comps[1:,:]
+    pass_x = dot(comp_x, comps)    
+    pass_x += mu
+    return pass_x
 
 # make pygmo problem 
 class optimizeRes:
@@ -32,7 +40,7 @@ class optimizeRes:
     #   between 2^-1 and 2^1
     def fitness(self, x):
         # convert to scale factor
-        pass_x = power(zeros(self.dim)+2.0,x)
+        pass_x = pca_comps_to_factors(x)
         # run cosy
         resol = cosyrun(pass_x, fNom, fox_name, self.out)
         #if resol[2] < 1e8:

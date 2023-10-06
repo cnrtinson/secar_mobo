@@ -25,11 +25,12 @@ kclusters = configs['clusters']
 optimized_params = configs['n_obj']
 objectives = configs['objectives']
 fNom = configs['fNominal_plot']
+fNom_keys = list(fNom.keys())
 magnet_dim = configs['magnet_dim']
 max_obj = configs['max_obj']
 
 # specify Tex details for pretty plots
-os.environ['PATH'] = os.environ['PATH'] + ':/mnt/misc/sw/indep/all/texlive/2013/bin/x86_64-linux/latex'
+#os.environ['PATH'] = os.environ['PATH'] + ':/mnt/misc/sw/indep/all/texlive/2013/bin/x86_64-linux/latex'
 #os.environ['PATH'] = os.environ['PATH'] + ':/usr/bin/tex'
 #plt.rcParams.update({
 #    "text.usetex": True,
@@ -87,42 +88,54 @@ def read_pop_df(filename, pop=None):
 
 def plot_pareto(df, df_compare, filename, PCA_run = False):
 #    df_compare = correct_obj_values(df_compare,filename)
-    sort_param = 4
+    sort_param = optimized_params -1 
     number_of_clusters = np.max(df['kcluster']+1)
     colors = np.array(list(plt.get_cmap('tab20').colors)).reshape(-1,3)
     print(colors, colors.shape, np.array(colors[0]).reshape(3))
-    j = 0
-    if optimized_params < 5:
-        j+=1
+    j = 1
+#    if optimized_params < 5:
+#        j+=5-optimized_params
     plot_x, plot_y = 0,0
     fig, axs = plt.subplots(optimized_params-1,sharex=True)
-    fig.suptitle('Pareto Fronts of each parameter vs. BeamSpotSize at DSSD')
+    fig.suptitle('Pareto Fronts of each parameter vs. MaxBeamWidth')
     axs[optimized_params-2].set_xlabel("DSSD_BeamSpot")
-    for obj in objectives[:-1]:
-        df.plot(x='FP4_BeamSpot',y=obj,style='o',ax=axs[plot_y],markersize=3.0,legend=False)
+#    for obj in objectives[:-1]:
+    for j in range(len(objectives[:-1])):
+        obj = objectives[j]
+        df.plot(x=objectives[-1],y=obj,style='o',ax=axs[plot_y],markersize=3.0,legend=False)
         if "closest" in df.columns:
             df_closest = df.loc[df['closest']==True]
             df_closest = df_closest.reset_index(drop=True)
             df_closest.plot(x=objectives[-1],y=obj,style='o',ax=axs[plot_y],markersize=3.0,legend=False)
         axs[plot_y].axes.set_ylabel(obj)
-        axs[plot_y].axvline(x=fNom[-1],linestyle="dashed",color="red")
-        axs[plot_y].axhline(y=fNom[j],linestyle="dashed",color="red")
+        axs[plot_y].axvline(x=fNom[objectives[sort_param]],linestyle="dashed",color="red")
+        axs[plot_y].axhline(y=fNom[objectives[j]],linestyle="dashed",color="red")
         cmap = matplotlib.colors.ListedColormap(matplotlib.cm.get_cmap("Pastel1").colors[:3])
         colors_x = np.zeros((2,2)) 
+#        if PCA_run:
+#        axs[plot_y].axes.set_xlim([0.85,1.03])
+        if plot_y==0:
+            axs[plot_y].axes.set_ylim([1,9])
+        elif plot_y==1:
+            axs[plot_y].axes.set_ylim([1.5,12.5])
         print(axs[plot_y].get_xlim(), axs[plot_y].get_ylim())
-        xlims = [axs[plot_y].get_xlim()[0], fNom[-1], axs[plot_y].get_xlim()[1]]
-        ylims = [axs[plot_y].get_ylim()[0], fNom[j], axs[plot_y].get_ylim()[1]]
+        xlims = [axs[plot_y].get_xlim()[0], fNom[objectives[sort_param]], axs[plot_y].get_xlim()[1]]
+        ylims = [axs[plot_y].get_ylim()[0], fNom[objectives[j]], axs[plot_y].get_ylim()[1]]
         for colori in range(colors_x.shape[0]):
             for colorj in range(colors_x.shape[1]):
                 colors_x[colori,colorj] = 0
-        if j < 3:
-            colors_x[1,0] = 2
-        else:
-            colors_x[0,0] = 2
+        colors_x[1,0] = 2
+#        if j < 3:
+#            colors_x[1,0] = 2
+#        else:
+#            colors_x[0,0] = 2
         print(colors_x)
         axs[plot_y].pcolormesh(xlims, ylims, colors_x, cmap=cmap)
-        j += 1
+#        j += 1
         plot_y += 1
+#        fNom_j += 1
+#        if fNom_j > 3:
+#            break
 
     axis_index = 0
     if optimized_params==5:
@@ -133,8 +146,11 @@ def plot_pareto(df, df_compare, filename, PCA_run = False):
     axs[axis_index].set_ylabel("FP2 Res.")
     axis_index += 1
     axs[axis_index].set_ylabel("FP3 Res.")
-    axis_index += 1
-    axs[axis_index].set_xlabel("DSSD Beamspot (cm)")
+#    axis_index += 1
+    if optimized_params!=3:
+        axs[axis_index].set_xlabel("DSSD Beamspot (cm)")
+    else:
+        axs[axis_index].set_xlabel("MaxBeamWidth")
     plt.savefig(filename+'_pareto.png')
 
 def main(filename, filename_compare):
@@ -154,20 +170,31 @@ def main(filename, filename_compare):
             query_txt += objectives[i] + "<{}".format(max_obj)
             if i < len(objectives)-1:
                 query_txt+="&"
+        df_compare = df_compare.query("MaxBeamWidth < 1.01") 
+        df_compare = df_compare.query("FP4_BeamSpot < 1.01") 
         df_compare = df_compare.query(query_txt)
         df = df_compare
+#        df_compare = df_compare.query("FP4_BeamSpot==1.0")
+#        df = df_compare
         filename=filename_compare
         PCA_run = True
         print(PCA_run)
-    for i in range(len(objectives)):
-        fNom_i = i
-        if optimized_params < 5:
-            fNom_i += 1
-        if fNom_i < 3:
-            df[objectives[i]] = df[objectives[i]].apply(lambda x: fNom[fNom_i] / x)
+    i = 0
+    for fNom_i in range(len(fNom)):
+#        if fNom_i in [0,4]:
+#            continue
+        if i < len(objectives):    
+            if fNom_keys[fNom_i] not in df.columns: 
+                continue
         else:
-            df[objectives[i]] = df[objectives[i]].apply(lambda x: fNom[fNom_i] * x)
-    
+            break
+        print(i, objectives[i], fNom_i, fNom[fNom_keys[fNom_i]])
+        if "_res" in objectives[i]:
+            df[objectives[i]] = df[objectives[i]].apply(lambda x: fNom[objectives[i]] / x)
+        else:
+            df[objectives[i]] = df[objectives[i]].apply(lambda x: fNom[objectives[i]] * x)
+        i += 1
+
     plot_pareto(df, df_compare, filename, PCA_run)
 
 if __name__=='__main__':
