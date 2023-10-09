@@ -47,7 +47,7 @@ seed = 56448180
 
 # MOEAD hyperparameters
 #   default parameters have worked well
-generations = 200
+generations = 300
 cr_p = 1.0 # crossover parameter, 1.0 by default
 f_p = 0.5 # diff evolution operator parameter, 0.5 by default
 eta_m = 1 # distribution index used by the polynomial mutation, 20 by default, lower value = higher variation, see sigma in eq. 7 of the moead/nsga2 paper

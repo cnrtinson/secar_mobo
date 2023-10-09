@@ -1,8 +1,7 @@
 {
 
-    "scratch_dir": "/scratch/hermanse/secar_mobo/",
-    "fox_name1": "SECAR_pg_Optics_WF2_21",
-    "fox_name": "SECAR_pg_Optics",
+    "scratch_dir": "/scratch/tinson/secar_mobo/",
+    "fox_name": "SECAR_pg_Optics_2.0",
     "pca_run": false,
     "fixed_cosy_objs": ["FP1_res","FP2_res","FP3_res","MaxBeamWidth","FP4_BeamSpot"],
     "n_obj": 3,    

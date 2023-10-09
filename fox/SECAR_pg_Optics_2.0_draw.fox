@@ -938,7 +938,7 @@ O1_SC:= 1.0;
 
 {THIS IS WHERE YOU CHANGE YOU CONFIGURATION}
 WF1R:=7.; {define the bending radius in WF1}
-WF2R:=7.; {define the bending radius in WF2 -- not important here because it is off; change from 7 to 21 for +- 100 kV}
+WF2R:=21.; {define the bending radius in WF2 -- not important here because it is off; change from 7 to 21 for +- 100 kV}
 WF1ON:=1; {WF2ON 0=OFF or 1=ON - CURRENTLY WF2 IS OFF}
 WF2ON:=1; {WF2ON 0=OFF or 1=ON - CURRENTLY WF2 IS OFF}
 MISALIGN:=1; {ACCOUNT =1 or not =0 for the measured misalignment}
